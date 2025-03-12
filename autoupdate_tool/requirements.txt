@@ -1,0 +1,4 @@
+openai==1.66.2
+loguru==0.7.*
+firebase-admin==6.6.*
+pandas==2.2.*
