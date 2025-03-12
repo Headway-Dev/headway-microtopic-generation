@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
 
+import loguru
+
 from modules import (
     openai_predictor,
     firebase_storages,
@@ -22,16 +24,27 @@ def parse_args() -> argparse.Namespace:
         "A .csv table with integer index column and content column cotaining names of the microtopics"
     ))
 
+    parser.add_argument('--strict-microtopics-filtering', action='store_true', help=(
+        "Filter out predicted topics that are not strictly in the predefined list"
+    ))
+
     return parser.parse_args()
 
 
 def main(args: argparse.Namespace) -> None:
     p_firestore_credentials = args.firebase_credentials
     p_microtopics_file = args.microtopics_file
+    strict_filtering = args.strict_microtopics_filtering
+
+    if strict_filtering:
+        loguru.logger.info('Using strict topic filtering')
+    else:
+        loguru.logger.info('Not using strict topic filtering')
 
     predictor = openai_predictor.OpenAIMicrotopicsPredictor(
         openai_key=args.openai_key,
         model='gpt-4o-mini',  # todo: de-hardcode
+        strict_mode=strict_filtering,
     )
     books_storage = firebase_storages.FirebaseBookStorage(
         p_creds=p_firestore_credentials
@@ -46,7 +59,6 @@ def main(args: argparse.Namespace) -> None:
         microtopics_storage=microtopics_storage
     )
     manager.run()
-    
     
 
 if __name__ == '__main__':
