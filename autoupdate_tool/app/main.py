@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     ))
 
     parser.add_argument('--microtopics-file', required=True, type=Path, help=(
-        "A .csv table with integer index column and content column cotaining names of the microtopics"
+        "A .csv table with integer index column and content column containing names of the micro-topics"
     ))
 
     parser.add_argument('--strict-microtopics-filtering', action='store_true', help=(
