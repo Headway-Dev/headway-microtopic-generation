@@ -1,3 +1,4 @@
+import itertools
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -49,25 +50,33 @@ class FirebaseBookStorage(abstract.AbstractBooksDataStorage):
         loguru.logger.debug('Fetching books from FireBase')
         self._books = []
 
-        book_doc_refs = self._db.collection('books').list_documents()
+        ref_buff = []
+        page_size = 100
+        books_ref_gen = self._db.collection('books').list_documents(page_size=page_size)
+        while True:
+            try:
+                doc_ref = next(books_ref_gen)
+                ref_buff.append(doc_ref)
+                stop = False
+            except:
+                stop = True
+            if stop or len(ref_buff) == page_size:
+                books_data = [d.to_dict() for d in self._db.get_all(ref_buff)]
+                ref_buff.clear()
 
-        def fetch_book(book_doc_ref):
-            identifier = book_doc_ref.id  # Alternative to splitting path
-            book_data = book_doc_ref.get().to_dict()
-
-            if not book_data or not book_data.get('enabled', False):
-                return None
-
-            en_title = book_data.get('localization', {}).get('en', {}).get('title')
-            if not en_title:
-                return None
-
-            return abstract.Book(identifier=identifier, title=en_title)
-
-        with ThreadPoolExecutor(max_workers=100) as executor:  # todo: de-hardcode the number of workers
-            books = list(executor.map(fetch_book, book_doc_refs))
-
-        self._books = [book for book in books if book]  # Remove None values
+                for book_data in books_data:
+                    if not book_data or not book_data.get('enabled', False):
+                        continue
+                    identifier = book_data.get('id')
+                    if not identifier:
+                        continue
+                    en_title = book_data.get('localization', {}).get('en', {}).get('title')
+                    if not en_title:
+                        continue
+                    self._books.append(abstract.Book(identifier=identifier, title=en_title))
+                loguru.logger.debug(f'Fetched {len(self._books)} books...')
+            if stop:
+                break
 
     def _load_identifier2microtopics(self) -> None:
         self._identifier2microtopics = dict()
