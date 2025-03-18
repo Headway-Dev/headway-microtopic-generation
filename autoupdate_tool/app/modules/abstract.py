@@ -21,16 +21,6 @@ class Book:
 
 class AbstractBooksDataStorage(ABC):
     @abstractmethod
-    def __enter__(self) -> "AbstractBooksDataStorage":
-        """E.g., set up db connection"""
-        pass
-
-    @abstractmethod
-    def __exit__(self, exc_type, exc_value, traceback):
-        """E.g., safely close db connection"""
-        pass
-
-    @abstractmethod
     def list_books(self) -> list[Book]:
         """
         :return: list of relevant books that ought to have microtopics
@@ -48,18 +38,12 @@ class AbstractBooksDataStorage(ABC):
     def set_book_microtopics(self, book_identifier: str, microtopics: list[str]) -> None:
         pass
 
+    @abstractmethod
+    def store_changes(self) -> None:
+        pass
+
 
 class AbstractMicrotopicsStorage(ABC):
-    @abstractmethod
-    def __enter__(self) -> "AbstractMicrotopicsStorage":
-        """E.g., set up db connection"""
-        pass
-
-    @abstractmethod
-    def __exit__(self, exc_type, exc_value, traceback):
-        """E.g., safely close db connection"""
-        pass
-
     @abstractmethod
     def list_microtopics(self) -> list[str]:
         """
