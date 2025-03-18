@@ -1,5 +1,3 @@
-import itertools
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import loguru
@@ -17,33 +15,21 @@ class FirebaseBookStorage(abstract.AbstractBooksDataStorage):
         app = initialize_app(creds)
         self._db = firestore.client(app)
 
-        self._is_active = False
         self._books: list[abstract.Book] | None = None
         self._identifier2microtopics: dict[str, list[str]] | None = None  # fetched from db
         self._identifier2microtopics_updates: dict[str, list[str]] = dict()  # to be inserted into db
 
-    def __enter__(self) -> "FirebaseBookStorage":
-        self._is_active = True
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self._upload_book_microtopics()
-        self._is_active = False
-
     def list_books(self) -> list[abstract.Book]:
-        assert self._is_active
         if self._books is None:
             self._load_books()
         return self._books
 
     def get_book_microtopics(self, book_identifier: str) -> list[str] | None:
-        assert self._is_active
         if self._identifier2microtopics is None:
             self._load_identifier2microtopics()
         return self._identifier2microtopics.get(book_identifier)
     
     def set_book_microtopics(self, book_identifier: str, microtopics: list[str]) -> None:
-        assert self._is_active
         self._identifier2microtopics_updates[book_identifier] = microtopics
 
     def _load_books(self) -> None:
@@ -83,7 +69,7 @@ class FirebaseBookStorage(abstract.AbstractBooksDataStorage):
         # todo: de-hardcode
         self._identifier2microtopics = self._db.collection('common').document('title_relations').get().to_dict()['microtopics']
 
-    def _upload_book_microtopics(self) -> None:
+    def store_changes(self) -> None:
         FIELDNAME = 'microtopics_test'
         self._identifier2microtopics.update(self._identifier2microtopics_updates)
         self._identifier2microtopics_updates.clear()
