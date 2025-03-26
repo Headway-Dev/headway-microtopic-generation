@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import loguru
@@ -73,8 +74,24 @@ class FirebaseBookStorage(abstract.AbstractBooksDataStorage):
         FIELDNAME = 'microtopics_test'
         self._identifier2microtopics.update(self._identifier2microtopics_updates)
         self._identifier2microtopics_updates.clear()
+
         # todo: de-hardcode
         self._db.collection('common').document('title_relations').update({
             FIELDNAME: self._identifier2microtopics
         })
         loguru.logger.info(f'Uploaded changes to {FIELDNAME}')
+
+    #     try:
+    #         self._backup_book_to_classes_locally()
+    #     except Exception as e:
+    #         print(e)
+    #
+    # # TODO: remove this very temporary method
+    # def _backup_book_to_classes_locally(self) -> None:
+    #     tpk_to_class = {k: v for k, v in json.loads(Path('data/tpk_to_class_en.json').read_text()).items()}
+    #     book_to_classes = dict()
+    #     for book in self.list_books():
+    #         book_to_classes[book.identifier] = [
+    #             tpk_to_class[tpk] for tpk in self.get_book_microtopics(book.identifier)
+    #         ]
+    #     Path('data/book_to_classes.json').write_text(json.dumps(book_to_classes, indent=2))

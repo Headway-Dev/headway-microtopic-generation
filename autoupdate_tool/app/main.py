@@ -20,8 +20,8 @@ def parse_args() -> argparse.Namespace:
         "Path to firebase certificate"
     ))
 
-    parser.add_argument('--microtopics-file', required=True, type=Path, help=(
-        "A .csv table with integer index column and content column containing names of the micro-topics"
+    parser.add_argument('--tpk-to-class', required=True, type=Path, help=(
+        "A JSON object mapping English micro-topics to integer classes"
     ))
 
     parser.add_argument('--strict-microtopics-filtering', action='store_true', help=(
@@ -33,7 +33,7 @@ def parse_args() -> argparse.Namespace:
 
 def main(args: argparse.Namespace) -> None:
     p_firestore_credentials = args.firebase_credentials
-    p_microtopics_file = args.microtopics_file
+    p_tpk_to_class = args.tpk_to_class
     strict_filtering = args.strict_microtopics_filtering
 
     if strict_filtering:
@@ -50,7 +50,7 @@ def main(args: argparse.Namespace) -> None:
         p_creds=p_firestore_credentials
     )
     microtopics_storage = local_microtopics_storage.LocalMicrotopicsStorage(
-        p_microtopics_csv=p_microtopics_file
+        p_tpk_to_class_en=p_tpk_to_class
     )
 
     manager = update_manager.UpdateManager(

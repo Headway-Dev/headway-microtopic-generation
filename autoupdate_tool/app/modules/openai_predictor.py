@@ -21,15 +21,16 @@ class OpenAIMicrotopicsPredictor(abstract.AbstracBookMicrotopicsPredictor):
             f'{model} not supported. Must be one of {SUPPORTED_MODELS}.'
         )
         self._client = OpenAI(api_key=openai_key)
+        self._model = model
         self._strict_mode = strict_mode
         
     def predict(self, book: abstract.Book, microtopics: list[str]) -> list[str]:
         all_mircotopics_s = ''.join(f'{mt}\n ' for i, mt in enumerate(microtopics))
         response = self._client.chat.completions.create(
-            model="gpt-4o",
+            model=self._model,
             response_format={ "type": "json_object" },
             messages=[
-                {"role": "system", "content": f"""Your task is to label the given book with approximately 8 exact tags from:\n {all_mircotopics_s}\n Sort the in the order of relevance. Return the list of relevant tags under key `result` as a JSON."""},
+                {"role": "system", "content": f"""Your task is to label the given book with approximately 8 exact tags from:\n {all_mircotopics_s}\n Prefer tags that are unique to this book. Sort them in the order of relevance. Return the list of relevant tags under key `result` as a JSON."""},
                 {"role": "user", "content": f"Title: {book.title}"}
             ]
         )

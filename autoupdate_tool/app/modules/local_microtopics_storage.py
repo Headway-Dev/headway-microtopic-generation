@@ -1,19 +1,22 @@
+import json
 import loguru
-import pandas as pd
 
 from . import abstract
 
 
 class LocalMicrotopicsStorage(abstract.AbstractMicrotopicsStorage):
-    def __init__(self, p_microtopics_csv) -> None:
-        self._microtopics: list[str] | None = None
-        self._p = p_microtopics_csv
+    def __init__(self, p_tpk_to_class_en) -> None:
+        self._tpk_to_class: dict[str, int] | None = None
+        self._p = p_tpk_to_class_en
 
     def list_microtopics(self) -> list[str]:
-        loguru.logger.debug('Fetching micro-topics')
-        if self._microtopics is None:
+        if self._tpk_to_class is None:
             self._load_microtopics()
-        return self._microtopics
+        return list(self._tpk_to_class.keys())
 
     def _load_microtopics(self) -> None:
-        self._microtopics = list(pd.read_csv(self._p, index_col=0).iloc[:, 0])
+        loguru.logger.debug('Fetching micro-topics')
+        self._tpk_to_class = json.loads(self._p.read_text())
+
+    def microtopic_to_class(self, tpk: str) -> int | None:
+        return self._tpk_to_class.get(tpk)
