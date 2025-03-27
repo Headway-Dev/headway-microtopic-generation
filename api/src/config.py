@@ -8,7 +8,7 @@ OPENAI_MODEL = 'gpt-4o-mini'
 
 
 DEFAULT_DATA_DIR = 'default_data/'
-DATA_DIR = 'data/'
+DATA_DIR = os.environ['API_DATA_DIR']
 TOPIC_TO_CLASS_EN_FILENAME = 'tpk_to_class_en.json'
 TOPIC_TO_CLASS_ES_FILENAME = 'tpk_to_class_es.json'
 
