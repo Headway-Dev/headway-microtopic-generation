@@ -1,0 +1,36 @@
+services:
+
+  book-topics-api:
+    build: .
+    environment:
+      PORT: 5050
+    ports:
+      - "5050:5050"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fastapi.rule=Host(`localhost`)"
+      - "traefik.http.routers.fastapi.entrypoints=web"
+      - "traefik.http.services.book-topics-api.loadbalancer.server.port=5050"
+
+  traefik:
+    image: "traefik:v3"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+#      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+#      - "--entrypoints.websecure.address=:443"
+#      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+#      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+#      - "--certificatesresolvers.myresolver.acme.email=yevhenii.stepanenko@makeheadway.com"
+#      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+#      - "443:443"
+      - "8080:8080"
+    volumes:
+#      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
