@@ -13,7 +13,7 @@ services:
       - "traefik.http.routers.fastapi.entrypoints=web"
       - "traefik.http.services.book-topics-api.loadbalancer.server.port=5050"
     volumes:
-      - '/opt/topics-api/data:/app/data'
+      - './data:/app/data'
 
   traefik:
     image: "traefik:v3"

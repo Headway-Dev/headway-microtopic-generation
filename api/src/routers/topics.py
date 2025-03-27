@@ -8,7 +8,6 @@ from src.models.book import LocalizedTopicsList, Localization
 from src.openai_topics import OpenAITopicsPredictor
 from src.book_topics_cache import BookTopicsCache
 
-router = APIRouter(prefix='/topics')
 
 TOPIC_TO_CLASS_EN = json.loads(Path(config.TOPIC_TO_CLASS_EN_FILE).read_text())
 CLASS_TO_TOPIC_EN = {v:k for k,v in TOPIC_TO_CLASS_EN.items()}
@@ -26,16 +25,20 @@ topics_cache = BookTopicsCache(
     p_file=Path(config.BOOK_TOPICS_CACHE_FILE)
 )
 
+router = APIRouter(prefix='/topics')
+
 
 @router.get('/book', response_model=list[LocalizedTopicsList])
 async def get_book_topics(
         identifier: str = Query(description='Book summary identifier'),
-        title: str = Query(description='Summary title')
+        title: str = Query(description='Summary title'),
+        book_overview: str | None = Query(description='Book overview for more context.', default=None)
 ) -> list[LocalizedTopicsList]:
     topic_ids = topics_cache.get(identifier)
     if topic_ids is None:
         topic_ids = topics_predictor.predict(
-            book_title=title
+            book_title=title,
+            book_overview=book_overview
         )
         topics_cache.set(identifier, topic_ids)
 
