@@ -3,6 +3,8 @@ import dotenv
 
 dotenv.load_dotenv()
 
+TEST_ACCESS_TOKEN = '8b0d0a8feae7be390b04112d1'
+
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 OPENAI_MODEL = 'gpt-4o-mini'
 

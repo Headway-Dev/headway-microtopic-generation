@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 
-from src import config
+from src import config, security
 from src.models.book import LocalizedTopicsList, Localization
 from src.openai_topics import OpenAITopicsPredictor
 from src.book_topics_cache import BookTopicsCache
@@ -32,7 +32,8 @@ router = APIRouter(prefix='/topics')
 async def get_book_topics(
         identifier: str = Query(description='Book summary identifier'),
         title: str = Query(description='Summary title'),
-        book_overview: str | None = Query(description='Book overview for more context.', default=None)
+        book_overview: str | None = Query(description='Book overview for more context.', default=None),
+        token: str = Depends(security.verify_token),
 ) -> list[LocalizedTopicsList]:
     topic_ids = topics_cache.get(identifier)
     if topic_ids is None:
