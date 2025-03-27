@@ -1,7 +1,8 @@
 services:
 
   book-topics-api:
-    build: .
+    image: us-central1-docker.pkg.dev/books-us/hw-airnd/hw-airnd-book-topics
+    pull_policy: always
     environment:
       PORT: 5050
       API_DATA_DIR: "/app/data"
@@ -9,8 +10,8 @@ services:
       - "5050:5050"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fastapi.rule=Host(`localhost`)"
-      - "traefik.http.routers.fastapi.entrypoints=web"
+      - "traefik.http.routers.book-topics-api.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.book-topics-api.entrypoints=web"
       - "traefik.http.services.book-topics-api.loadbalancer.server.port=5050"
     volumes:
       - './data:/app/data'
@@ -19,8 +20,8 @@ services:
     image: "traefik:v3"
     container_name: "traefik"
     command:
-#      - "--log.level=DEBUG"
-#      - "--api.insecure=true"
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
